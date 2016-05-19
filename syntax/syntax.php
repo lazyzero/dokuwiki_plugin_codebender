@@ -54,6 +54,7 @@ class syntax_plugin_codebender_syntax extends DokuWiki_Syntax_Plugin {
      */
     public function handle($match, $state, $pos, Doku_Handler &$handler){
         $data = array();
+        var_dump($data);
 
         return $data;
     }
