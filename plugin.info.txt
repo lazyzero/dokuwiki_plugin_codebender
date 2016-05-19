@@ -1,0 +1,7 @@
+base   codebender
+author Christian Moll
+email  christian@chrmoll.de
+date   2016-05-19
+name   codebender plugin
+desc   Plugin to embbed codebender iframe to your wiki for sharing Arduino code and direct programming within the browser.
+url    http://lazyzero.de/
