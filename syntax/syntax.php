@@ -22,11 +22,14 @@ class syntax_plugin_codebender_syntax extends DokuWiki_Syntax_Plugin {
     public function getPType() {
         return 'block';
     }
+    function getAllowedTypes() {
+	return array('container','substition','protected','disabled','formatting','paragraphs'); 
+    }
     /**
      * @return int Sort order - Low numbers go before high numbers
      */
     public function getSort() {
-        return 111;
+        return 200;
     }
 
     /**
@@ -35,13 +38,12 @@ class syntax_plugin_codebender_syntax extends DokuWiki_Syntax_Plugin {
      * @param string $mode Parser mode
      */
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<codebender>',$mode,'plugin_codebender_syntax');
-//        $this->Lexer->addEntryPattern('<FIXME>',$mode,'plugin_codebender_syntax');
+        $this->Lexer->addEntryPattern('<codebender>(?=.*?</codebender.*?>)',$mode,'plugin_codebender_syntax');
     }
 
-   public function postConnect() {
-       $this->Lexer->addExitPattern('</codebender>','plugin_codebender_syntax');
-   }
+    public function postConnect() {
+        $this->Lexer->addExitPattern('</codebender>','plugin_codebender_syntax');
+    }
 
     /**
      * Handle matches of the codebender syntax
@@ -53,10 +55,11 @@ class syntax_plugin_codebender_syntax extends DokuWiki_Syntax_Plugin {
      * @return array Data for the renderer
      */
     public function handle($match, $state, $pos, Doku_Handler &$handler){
-        $data = array();
-        var_dump($data);
-
-        return $data;
+        switch($state) {
+           case DOKU_LEXER_ENTER: return array($state, '');
+           case DOKU_LEXER_UNMATCHED: return array($state, $match);
+           case DOKU_LEXER_EXIT: return array($state, '');
+        }
     }
 
     /**
@@ -68,9 +71,24 @@ class syntax_plugin_codebender_syntax extends DokuWiki_Syntax_Plugin {
      * @return bool If rendering was successful.
      */
     public function render($mode, Doku_Renderer &$renderer, $data) {
-        if($mode != 'xhtml') return false;
+        if($mode == 'xhtml') {
+	  list($state, $match) = $data;
 
-        return true;
+	  switch($state) {
+	    case DOKU_LEXER_ENTER: 
+	      $renderer->doc .= "<div class='codebender'>"; 
+	      break;
+	    case DOKU_LEXER_UNMATCHED: 
+	      $renderer->doc .=  '<iframe style="height: 510px; width: 100%; margin: 10px 0 10px;" allowTransparency="true" src="https://codebender.cc/embed/sketch:'.$match.'" frameborder="0"></iframe>'; 
+	      break;
+	    case DOKU_LEXER_EXIT: 
+	      $renderer->doc .= "</div>"; 
+	      break;
+	  }
+	  
+	  return true;
+	  }
+        return false;
     }
 }
 
